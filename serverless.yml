@@ -99,7 +99,6 @@ functions:
       - Effect: Allow
         Action:
           - dynamodb:Query
-          - dynamodb:Scan
         Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TRADES_TABLE}
 
   createTrade:
@@ -225,7 +224,7 @@ resources:
               - AttributeName: tradeDate
                 KeyType: RANGE
             Projection:
-            # the full item is available in the secondary index with all attributes
+              # the full item is available in the secondary index with all attributes
               ProjectionType: ALL
           - IndexName: ${self:provider.environment.INDEX_EXCHANGE_TABLE}
             KeySchema:

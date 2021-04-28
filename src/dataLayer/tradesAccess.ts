@@ -18,19 +18,13 @@ export class TodoAccess {
 	) {}
 
 	async getTrades(userId): Promise<CreateTrade[]> {
-		// const result = await this.docClient
-		// 	.query({
-		// 		TableName: this.todosTable,
-		// 		KeyConditionExpression: 'userId = :userId',
-		// 		ExpressionAttributeValues: {
-		// 			':userId': userId
-		// 		}
-		// 	})
-		// 	.promise()
-		console.log(userId)
 		const result = await this.docClient
-			.scan({
+			.query({
 				TableName: this.tradesTable,
+				KeyConditionExpression: 'userId = :userId',
+				ExpressionAttributeValues: {
+					':userId': userId,
+				},
 			})
 			.promise()
 
