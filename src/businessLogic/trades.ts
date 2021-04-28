@@ -2,7 +2,7 @@
 
 import * as uuid from 'uuid'
 import { CreateTrade } from '../models/CreateTrade'
-import { TodoAccess } from '../dataLayer/todosAccess'
+import { TodoAccess } from '../dataLayer/tradesAccess'
 import { CreateTradeRequest } from '../requests/CreateTradeRequest'
 import { UpdateTradeRequest } from '../requests/UpdateTradeRequest'
 import { parseUserId } from '../auth/utils'
