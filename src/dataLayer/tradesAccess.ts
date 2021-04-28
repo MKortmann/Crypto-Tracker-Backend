@@ -67,12 +67,12 @@ export class TradeAccess {
 			})
 			.promise()
 
-		// await this.s3
-		// 	.deleteObject({
-		// 		Bucket: this.s3Bucket,
-		// 		Key: tradeId,
-		// 	})
-		// 	.promise()
+		await this.s3
+			.deleteObject({
+				Bucket: this.s3Bucket,
+				Key: tradeId,
+			})
+			.promise()
 
 		return result
 	}
