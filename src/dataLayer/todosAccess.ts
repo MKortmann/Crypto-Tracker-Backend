@@ -2,7 +2,7 @@ import * as AWS from 'aws-sdk'
 import * as AWSXRay from 'aws-xray-sdk'
 import { DocumentClient } from 'aws-sdk/clients/dynamodb'
 import { createLogger } from '../utils/logger'
-import { TodoItem } from '../models/TodoItem'
+import { CreateTrade } from '../models/CreateTrade'
 import { UpdateTradeRequest } from '../requests/UpdateTradeRequest'
 
 const XAWS = AWSXRay.captureAWS(AWS)
@@ -11,43 +11,49 @@ const logger = createLogger('todosAccess')
 export class TodoAccess {
 	constructor(
 		private readonly docClient: DocumentClient = createDynamoDBClient(),
-		private readonly todosTable = process.env.TRADES_TABLE,
+		private readonly tradesTable = process.env.TRADES_TABLE,
 		private readonly s3 = new AWS.S3({ signatureVersion: 'v4' }),
 		private readonly s3Bucket = process.env.USER_IMAGE_S3_BUCKET,
 		private readonly urlExpiration = process.env.USER_SIGNED_URL_EXPIRATION
 	) {}
 
-	async getTrades(userId): Promise<TodoItem[]> {
+	async getTrades(userId): Promise<CreateTrade[]> {
+		// const result = await this.docClient
+		// 	.query({
+		// 		TableName: this.todosTable,
+		// 		KeyConditionExpression: 'userId = :userId',
+		// 		ExpressionAttributeValues: {
+		// 			':userId': userId
+		// 		}
+		// 	})
+		// 	.promise()
+		console.log(userId)
 		const result = await this.docClient
-			.query({
-				TableName: this.todosTable,
-				KeyConditionExpression: 'userId = :userId',
-				ExpressionAttributeValues: {
-					':userId': userId
-				}
+			.scan({
+				TableName: this.tradesTable,
 			})
 			.promise()
 
 		logger.info('Result', result)
 
 		const items = result.Items
-		return items as TodoItem[]
+		return items as CreateTrade[]
 	}
 
 	async deleteItem(userId: string, tradeId: string) {
 		let result = {
 			statusCode: 200,
-			body: ''
+			body: '',
 		}
 
 		let todoToBeDeleted = await this.docClient
 			.query({
-				TableName: this.todosTable,
+				TableName: this.tradesTable,
 				KeyConditionExpression: 'userId = :userId AND tradeId = :tradeId',
 				ExpressionAttributeValues: {
 					':userId': userId,
-					':tradeId': tradeId
-				}
+					':tradeId': tradeId,
+				},
 			})
 			.promise()
 
@@ -59,33 +65,33 @@ export class TodoAccess {
 
 		await this.docClient
 			.delete({
-				TableName: this.todosTable,
+				TableName: this.tradesTable,
 				Key: {
 					userId,
-					tradeId
-				}
+					tradeId,
+				},
 			})
 			.promise()
 
 		await this.s3
 			.deleteObject({
 				Bucket: this.s3Bucket,
-				Key: tradeId
+				Key: tradeId,
 			})
 			.promise()
 
 		return result
 	}
 
-	async createTrade(todo: TodoItem): Promise<TodoItem> {
+	async createTrade(trade: CreateTrade): Promise<CreateTrade> {
 		await this.docClient
 			.put({
-				TableName: this.todosTable,
-				Item: todo
+				TableName: this.tradesTable,
+				Item: trade,
 			})
 			.promise()
 
-		return todo
+		return trade
 	}
 
 	async updateTrade(
@@ -95,17 +101,17 @@ export class TodoAccess {
 	) {
 		let result = {
 			statusCode: 200,
-			body: ''
+			body: '',
 		}
 
 		let todoToBeUpdate = await this.docClient
 			.query({
-				TableName: this.todosTable,
+				TableName: this.tradesTable,
 				KeyConditionExpression: 'userId = :userId AND tradeId = :tradeId',
 				ExpressionAttributeValues: {
 					':userId': userId,
-					':tradeId': tradeId
-				}
+					':tradeId': tradeId,
+				},
 			})
 			.promise()
 
@@ -114,52 +120,30 @@ export class TodoAccess {
 		if (todoToBeUpdate.Items.length === 0) {
 			result = {
 				statusCode: 404,
-				body: 'The item to be update was not found'
+				body: 'The item to be update was not found',
 			}
 			return result
 		}
 
-		// The done property is optional
-		if (!parsedBody.hasOwnProperty('done')) {
-			await this.docClient
-				.update({
-					TableName: this.todosTable,
-					Key: {
-						userId,
-						tradeId
-					},
-					UpdateExpression: 'set #name =:name, #dueDate=:dueDate',
-					ExpressionAttributeValues: {
-						':name': parsedBody.name,
-						':dueDate': parsedBody.dueDate
-					},
-					ExpressionAttributeNames: { '#name': 'name', '#dueDate': 'dueDate' },
-					ReturnValues: 'UPDATED_NEW'
-				})
-				.promise()
-		} else {
-			await this.docClient
-				.update({
-					TableName: this.todosTable,
-					Key: {
-						userId,
-						tradeId
-					},
-					UpdateExpression: 'set #name =:name, #dueDate=:dueDate, #done=:done',
-					ExpressionAttributeValues: {
-						':name': parsedBody.name,
-						':dueDate': parsedBody.dueDate,
-						':done': parsedBody.done
-					},
-					ExpressionAttributeNames: {
-						'#name': 'name',
-						'#dueDate': 'dueDate',
-						'#done': 'done'
-					},
-					ReturnValues: 'UPDATED_NEW'
-				})
-				.promise()
-		}
+		await this.docClient
+			.update({
+				TableName: this.tradesTable,
+				Key: {
+					userId,
+					tradeId,
+				},
+				UpdateExpression: 'set #crypto =:crypto, #tradeDate=:tradeDate',
+				ExpressionAttributeValues: {
+					':crypto': parsedBody.crypto,
+					':tradeDate': parsedBody.tradeDate,
+				},
+				ExpressionAttributeNames: {
+					'#crypto': 'crypto',
+					'#tradeDate': 'tradeDate',
+				},
+				ReturnValues: 'UPDATED_NEW',
+			})
+			.promise()
 
 		return result
 	}
@@ -167,48 +151,48 @@ export class TodoAccess {
 	async generateUploadUrl(userId, tradeId) {
 		let result = {
 			statusCode: 201,
-			body: ''
+			body: '',
 		}
 
 		let checkIfExist = await this.docClient
 			.query({
-				TableName: this.todosTable,
+				TableName: this.tradesTable,
 				KeyConditionExpression: 'userId = :userId AND tradeId = :tradeId',
 				ExpressionAttributeValues: {
 					':userId': userId,
-					':tradeId': tradeId
-				}
+					':tradeId': tradeId,
+				},
 			})
 			.promise()
 
 		if (checkIfExist.Items.length === 0) {
 			result = {
 				statusCode: 404,
-				body: 'The item to be update was not found'
+				body: 'The item to be update was not found',
 			}
 			return result
 		}
 
 		await this.docClient
 			.update({
-				TableName: this.todosTable,
+				TableName: this.tradesTable,
 				Key: {
 					userId,
-					tradeId
+					tradeId,
 				},
 				UpdateExpression: 'set #attachmentUrl =:attachmentUrl',
 				ExpressionAttributeValues: {
-					':attachmentUrl': `https://${this.s3Bucket}.s3.amazonaws.com/${tradeId}`
+					':attachmentUrl': `https://${this.s3Bucket}.s3.amazonaws.com/${tradeId}`,
 				},
 				ExpressionAttributeNames: { '#attachmentUrl': 'attachmentUrl' },
-				ReturnValues: 'UPDATED_NEW'
+				ReturnValues: 'UPDATED_NEW',
 			})
 			.promise()
 
 		result.body = this.s3.getSignedUrl('putObject', {
 			Bucket: this.s3Bucket,
 			Key: tradeId,
-			Expires: parseInt(this.urlExpiration)
+			Expires: parseInt(this.urlExpiration),
 		})
 
 		return result
@@ -220,7 +204,7 @@ function createDynamoDBClient(): AWS.DynamoDB.DocumentClient {
 		logger.info('Creating a local DynamoDB instance')
 		return new XAWS.DynamoDB.DocumentClient({
 			region: 'localhost',
-			endpoint: 'http://localhost:8000'
+			endpoint: 'http://localhost:8000',
 		})
 	}
 

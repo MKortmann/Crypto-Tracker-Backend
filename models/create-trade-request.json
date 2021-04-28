@@ -3,21 +3,38 @@
   "title": "create",
   "type": "object",
   "properties": {
-    "name": {
+    "crypto": {
       "type": "string"
     },
-    "dueDate": {
+    "tradeDate": {
       "type": "string"
     },
-    "description": {
+    "tradeType": {
+      "type": "string"
+    },
+    "tradeCostPercent": {
+      "type": "string"
+    },
+    "exchange": {
       "type": "string",
       "minLength": 3,
-      "maxLength": 50
+      "maxLength": 20
+    },
+    "quantity": {
+      "type": "number"
+    },
+    "price": {
+      "type": "number"
     }
   },
   "required": [
-    "name",
-    "dueDate"
+    "crypto",
+    "tradeDate",
+    "tradeType",
+    "tradeCostPercent",
+    "exchange",
+    "quantity",
+    "price"
   ],
   "additionalProperties": false
 }

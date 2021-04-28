@@ -1,7 +1,7 @@
 // Contains all business logic to work with groups in our application
 
 import * as uuid from 'uuid'
-import { TodoItem } from '../models/TodoItem'
+import { CreateTrade } from '../models/CreateTrade'
 import { TodoAccess } from '../dataLayer/todosAccess'
 import { CreateTradeRequest } from '../requests/CreateTradeRequest'
 import { UpdateTradeRequest } from '../requests/UpdateTradeRequest'
@@ -13,7 +13,7 @@ const logger = createLogger('todos')
 // all code that works with DynamoDB is encapsulated in the dataLayer called TodoAccess
 const todoAccess = new TodoAccess()
 
-export async function getTrades(jwtToken: string): Promise<TodoItem[]> {
+export async function getTrades(jwtToken: string): Promise<CreateTrade[]> {
 	const userId = parseUserId(jwtToken)
 
 	return todoAccess.getTrades(userId)
@@ -40,15 +40,14 @@ export async function createTrade(
 		userId,
 		tradeId,
 		createdAt: new Date().toISOString(),
-		done: false,
 		...parsedBody,
-		attachmentUrl: ''
+		attachmentUrl: '',
 	}
 
-	logger.info('Item to be created at business logic', item)
-	const toReturn = todoAccess.createTrade(item)
+	logger.info('Trade Item to be created at business logic', item)
+	const result = todoAccess.createTrade(item)
 
-	return toReturn
+	return result
 }
 
 export async function updateTrade(

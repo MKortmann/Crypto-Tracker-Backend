@@ -6,7 +6,7 @@
     "name": {
       "type": "string"
     },
-    "dueDate": {
+    "tradeDate": {
       "type": "string"
     },
     "description": {
@@ -17,7 +17,7 @@
   },
   "required": [
     "name",
-    "dueDate"
+    "tradeDate"
   ],
   "additionalProperties": {
     "properties": {

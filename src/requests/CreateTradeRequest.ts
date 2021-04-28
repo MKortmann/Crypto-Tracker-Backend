@@ -1,7 +1,12 @@
 /**
- * Fields in a request to create a single TODO item.
+ * Fields in a request to create a single TRADE item.
  */
 export interface CreateTradeRequest {
-	name: string
-	dueDate: string
+	crypto: string
+	tradeDate: string
+	tradeType: string
+	tradeCostPercent: number
+	exchange: string
+	quantity: number
+	price: number
 }

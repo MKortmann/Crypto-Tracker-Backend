@@ -38,7 +38,9 @@ provider:
     USER_IMAGE_S3_BUCKET: ${self:service.name}-images-${self:provider.stage}
     # add a presigned url for the upload url s3 bucket - 10 minutes expiration time
     USER_SIGNED_URL_EXPIRATION: 700
-    INDEX_NAME_TABLE: tradeDate
+    INDEX_TRADE_TABLE: tradeDate
+    INDEX_EXCHANGE_TABLE: exchange
+    INDEX_CRYPTO_TABLE: crypto
 
   iamRoleStatements:
     # for canary deployment to allow to use codedeploy
@@ -97,6 +99,7 @@ functions:
       - Effect: Allow
         Action:
           - dynamodb:Query
+          - dynamodb:Scan
         Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TRADES_TABLE}
 
   createTrade:
@@ -204,6 +207,10 @@ resources:
             AttributeType: S
           - AttributeName: tradeId
             AttributeType: S
+          - AttributeName: exchange
+            AttributeType: S
+          - AttributeName: crypto
+            AttributeType: S
         # so, we set the simple primary key as hash key
         KeySchema:
           - AttributeName: userId
@@ -211,11 +218,28 @@ resources:
           - AttributeName: tradeId
             KeyType: RANGE
         LocalSecondaryIndexes:
-          - IndexName: ${self:provider.environment.INDEX_NAME_TABLE}
+          - IndexName: ${self:provider.environment.INDEX_TRADE_TABLE}
             KeySchema:
               - AttributeName: userId
                 KeyType: HASH
               - AttributeName: tradeDate
+                KeyType: RANGE
+            Projection:
+            # the full item is available in the secondary index with all attributes
+              ProjectionType: ALL
+          - IndexName: ${self:provider.environment.INDEX_EXCHANGE_TABLE}
+            KeySchema:
+              - AttributeName: userId
+                KeyType: HASH
+              - AttributeName: exchange
+                KeyType: RANGE
+            Projection:
+              ProjectionType: ALL
+          - IndexName: ${self:provider.environment.INDEX_CRYPTO_TABLE}
+            KeySchema:
+              - AttributeName: userId
+                KeyType: HASH
+              - AttributeName: crypto
                 KeyType: RANGE
             Projection:
               ProjectionType: ALL
