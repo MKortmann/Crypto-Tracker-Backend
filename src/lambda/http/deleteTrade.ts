@@ -1,27 +1,27 @@
 import 'source-map-support/register'
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
 import { createLogger } from '../../utils/logger'
-import { getTodos } from '../../businessLogic/todos'
+import { deleteTrade } from '../../businessLogic/trades'
 import { getToken } from '../utils'
 import * as middy from 'middy'
 import { cors } from 'middy/middlewares'
 
-const logger = createLogger('getTodos')
+const logger = createLogger('deleteTrade')
 
 export const handler = middy(
 	async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
-		logger.info('Processing getTodos Event: ', {
+		const tradeId = event.pathParameters.tradeId
+
+		logger.info('At delete lambda function', {
 			event
 		})
 
 		const jwtToken = getToken(event)
-		const items = await getTodos(jwtToken)
+		const result = await deleteTrade(jwtToken, tradeId)
 
 		return {
-			statusCode: 200,
-			body: JSON.stringify({
-				items
-			})
+			statusCode: result.statusCode,
+			body: result.body
 		}
 	}
 )

@@ -1,24 +1,24 @@
 import 'source-map-support/register'
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
-import { CreateTodoRequest } from '../../requests/CreateTodoRequest'
-import { createTodo } from '../../businessLogic/todos'
+import { CreateTradeRequest } from '../../requests/CreateTradeRequest'
+import { createTrade } from '../../businessLogic/trades'
 import { createLogger } from '../../utils/logger'
 import { getToken } from '../utils'
 import * as middy from 'middy'
 import { cors } from 'middy/middlewares'
 
-const logger = createLogger('createTodo')
+const logger = createLogger('createTrades')
 
 export const handler = middy(
 	async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
-		logger.info('Processing createTodo Event: ', {
+		logger.info('Processing createTrade Event: ', {
 			event
 		})
 
-		const parsedBody: CreateTodoRequest = JSON.parse(event.body)
+		const parsedBody: CreateTradeRequest = JSON.parse(event.body)
 		const jwtToken = getToken(event)
 
-		const item = await createTodo(jwtToken, parsedBody)
+		const item = await createTrade(jwtToken, parsedBody)
 
 		logger.info('item created', item)
 

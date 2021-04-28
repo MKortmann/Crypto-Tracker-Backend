@@ -1,29 +1,29 @@
 import 'source-map-support/register'
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
-import { UpdateTodoRequest } from '../../requests/UpdateTodoRequest'
-import { updatedTodo } from '../../businessLogic/todos'
+import { UpdateTradeRequest } from '../../requests/UpdateTradeRequest'
+import { updateTrade } from '../../businessLogic/trades'
 import { createLogger } from '../../utils/logger'
 import { getToken } from '../utils'
 import * as middy from 'middy'
 import { cors } from 'middy/middlewares'
 
-const logger = createLogger('updateTodos')
+const logger = createLogger('updateTrades')
 
 export const handler = middy(
 	async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
-		const todoId = event.pathParameters.todoId
-		const parsedBody: UpdateTodoRequest = JSON.parse(event.body)
+		const tradeId = event.pathParameters.tradeId
+		const parsedBody: UpdateTradeRequest = JSON.parse(event.body)
 
 		logger.info('Getting an item to be updated: ', {
 			event
 		})
 		logger.info('Item to be updated: ', {
-			updatedTodo
+			updateTrade
 		})
 
 		const jwtToken = getToken(event)
 
-		const result = await updatedTodo(jwtToken, todoId, parsedBody)
+		const result = await updateTrade(jwtToken, tradeId, parsedBody)
 
 		return {
 			statusCode: result.statusCode,

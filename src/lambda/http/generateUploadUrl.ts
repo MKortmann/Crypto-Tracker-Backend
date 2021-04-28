@@ -1,6 +1,6 @@
 import 'source-map-support/register'
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
-import { generateUploadUrl } from '../../businessLogic/todos'
+import { generateUploadUrl } from '../../businessLogic/trades'
 import { createLogger } from '../../utils/logger'
 import { getToken } from '../utils'
 import * as middy from 'middy'
@@ -14,11 +14,11 @@ export const handler = middy(
 			event
 		})
 
-		const todoId = event.pathParameters.todoId
+		const tradeId = event.pathParameters.tradeId
 
 		const jwtToken = getToken(event)
 
-		const result = await generateUploadUrl(jwtToken, todoId)
+		const result = await generateUploadUrl(jwtToken, tradeId)
 
 		// return a presigned URL to upload a file for a TODO item with the provided id
 		return {

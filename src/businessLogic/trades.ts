@@ -3,8 +3,8 @@
 import * as uuid from 'uuid'
 import { TodoItem } from '../models/TodoItem'
 import { TodoAccess } from '../dataLayer/todosAccess'
-import { CreateTodoRequest } from '../requests/CreateTodoRequest'
-import { UpdateTodoRequest } from '../requests/UpdateTodoRequest'
+import { CreateTradeRequest } from '../requests/CreateTradeRequest'
+import { UpdateTradeRequest } from '../requests/UpdateTradeRequest'
 import { parseUserId } from '../auth/utils'
 import { createLogger } from '../utils/logger'
 
@@ -13,32 +13,32 @@ const logger = createLogger('todos')
 // all code that works with DynamoDB is encapsulated in the dataLayer called TodoAccess
 const todoAccess = new TodoAccess()
 
-export async function getTodos(jwtToken: string): Promise<TodoItem[]> {
+export async function getTrades(jwtToken: string): Promise<TodoItem[]> {
 	const userId = parseUserId(jwtToken)
 
-	return todoAccess.getTodos(userId)
+	return todoAccess.getTrades(userId)
 }
 
-export async function deleteTodo(jwtToken: string, todoId: string) {
+export async function deleteTrade(jwtToken: string, tradeId: string) {
 	const userId = parseUserId(jwtToken)
-	const toReturn = todoAccess.deleteItem(userId, todoId)
+	const toReturn = todoAccess.deleteItem(userId, tradeId)
 
 	return toReturn
 }
 
-export async function createTodo(
+export async function createTrade(
 	jwtToken: string,
-	parsedBody: CreateTodoRequest
+	parsedBody: CreateTradeRequest
 ) {
 	const userId = parseUserId(jwtToken)
-	const todoId = uuid.v4()
+	const tradeId = uuid.v4()
 
 	logger.info('userId', userId)
-	logger.info('todoId', todoId)
+	logger.info('tradeId', tradeId)
 
 	const item = {
 		userId,
-		todoId,
+		tradeId,
 		createdAt: new Date().toISOString(),
 		done: false,
 		...parsedBody,
@@ -46,25 +46,25 @@ export async function createTodo(
 	}
 
 	logger.info('Item to be created at business logic', item)
-	const toReturn = todoAccess.createTodo(item)
+	const toReturn = todoAccess.createTrade(item)
 
 	return toReturn
 }
 
-export async function updatedTodo(
+export async function updateTrade(
 	jwtToken: string,
-	todoId: string,
-	parsedBody: UpdateTodoRequest
+	tradeId: string,
+	parsedBody: UpdateTradeRequest
 ) {
 	const userId = parseUserId(jwtToken)
-	const result = todoAccess.updateTodo(userId, todoId, parsedBody)
+	const result = todoAccess.updateTrade(userId, tradeId, parsedBody)
 
 	return result
 }
 
-export async function generateUploadUrl(jwtToken: string, todoId: string) {
+export async function generateUploadUrl(jwtToken: string, tradeId: string) {
 	const userId = parseUserId(jwtToken)
-	const result = todoAccess.generateUploadUrl(userId, todoId)
+	const result = todoAccess.generateUploadUrl(userId, tradeId)
 
 	return result
 }

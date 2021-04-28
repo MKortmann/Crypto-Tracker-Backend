@@ -33,13 +33,12 @@ provider:
   environment:
     # The DynamoDB table have unique names. They need to be unique per account per region
     # Names are UTF-8 encoded, case-sensitive and should be between 3 and 255 charaters long
-    TODOS_TABLE: ${self:service.name}-Todos-${self:provider.stage}
+    TRADES_TABLE: ${self:service.name}-trades-${self:provider.stage}
     # bucket name should not contain uppgercase characters
-    TODOS_IMAGES_S3_BUCKET: ${self:service.name}-images-${self:provider.stage}
+    USER_IMAGE_S3_BUCKET: ${self:service.name}-images-${self:provider.stage}
     # add a presigned url for the upload url s3 bucket - 10 minutes expiration time
-    TODOS_SIGNED_URL_EXPIRATION: 700
-    # index name for the table
-    INDEX_NAME: dueDate
+    USER_SIGNED_URL_EXPIRATION: 700
+    INDEX_NAME_TABLE: tradeDate
 
   iamRoleStatements:
     # for canary deployment to allow to use codedeploy
@@ -67,108 +66,108 @@ custom:
     api:
       info:
         version: v1.0.0
-        title: Todo API
+        title: Trade API
         description: Serverless application for crypto-tracker add/update/delete/edit cryptos
     models:
-      - name: CreateTodo
+      - name: createTrade
         contentType: application/json
-        schema: ${file(models/create-todo-request.json)}
-      - name: UpdateTodo
+        schema: ${file(models/create-trade-request.json)}
+      - name: updateTrade
         contentType: application/json
         # the schema definition is a file that is located here
-        schema: ${file(models/update-todo-request.json)}
+        schema: ${file(models/update-trade-request.json)}
 
 functions:
   Auth:
     handler: src/lambda/auth/auth0Authorizer.handler
 
-  # TODO: Configure this function
-  GetTodos:
-    handler: src/lambda/http/getTodos.handler
+  # trade: Configure this function
+  GetTrades:
+    handler: src/lambda/http/getTrades.handler
     events:
       - http:
           method: get
-          path: todos
+          path: trades
           # fix problem with preflight request
           cors: true
           # so we specified here that it should use the auth func. specified before
-          authorizer: Auth
+          # authorizer: Auth
     iamRoleStatements:
-      # TODOS_TABLE permissions for all lambda functions
+      # TRADES_TABLE permissions for all lambda functions
       - Effect: Allow
         Action:
           - dynamodb:Query
-        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}
+        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TRADES_TABLE}
 
-  CreateTodo:
-    handler: src/lambda/http/createTodo.handler
+  createTrade:
+    handler: src/lambda/http/createTrade.handler
     events:
       - http:
           method: post
-          path: todos
+          path: trades
           cors: true
           # so we specified here that it should use the auth func. specified before
-          authorizer: Auth
+          # authorizer: Auth
           reqValidatorName: RequestBodyValidator
           documentation:
-            summary: Create a new todo item
-            description: Create a todo item
+            summary: Create a new trade item
+            description: Create a trade item
             requestModels:
-              'application/json': CreateTodo
+              'application/json': createTrade
     iamRoleStatements:
-      # TODOS_TABLE permissions for all lambda functions
+      # TRADES_TABLE permissions for all lambda functions
       - Effect: Allow
         Action:
           - dynamodb:PutItem
           - dynamodb:UpdateItem
-        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}
+        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TRADES_TABLE}
 
-  UpdateTodo:
-    handler: src/lambda/http/updateTodo.handler
+  UpdateTrade:
+    handler: src/lambda/http/updateTrade.handler
     events:
       - http:
           method: patch
-          path: todos/{todoId}
+          path: trades/{tradeId}
           cors: true
-          authorizer: Auth
+          # authorizer: Auth
           reqValidatorName: RequestBodyValidator
           documentation:
-            summary: Update a todo item
-            description: Update a todo item
+            summary: Update a trade item
+            description: Update a trade item
             requestModels:
-              'application/json': UpdateTodo
+              'application/json': updateTrade
     iamRoleStatements:
-      # TODOS_TABLE permissions for all lambda functions
+      # TRADES_TABLE permissions for all lambda functions
       - Effect: Allow
         Action:
           - dynamodb:Query
           - dynamodb:UpdateItem
-        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}
+        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TRADES_TABLE}
   # adding deployment settings for canary deployment, but commented because of
   # deploymentSettings:
   #   type: Linear10Percent1Minute
   #   alias: Live
 
-  DeleteTodo:
-    handler: src/lambda/http/deleteTodo.handler
+  DeleteTrade:
+    handler: src/lambda/http/deleteTrade.handler
     events:
       - http:
           method: delete
-          path: todos/{todoId}
+          path: trades/{tradeId}
           cors: true
-          authorizer: Auth
+          # authorizer: Auth
     iamRoleStatements:
-      # TODOS_TABLE permissions for all lambda functions
+      # TRADES_TABLE permissions for all lambda functions
       - Effect: Allow
         Action:
           - dynamodb:Query
           - dynamodb:DeleteItem
-        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}
+        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TRADES_TABLE}
       # add permissions to be able to put and get objects for our s3 bucket
       - Effect: Allow
         Action:
           - s3:DeleteObject
-        Resource: arn:aws:s3:::${self:provider.environment.TODOS_IMAGES_S3_BUCKET}/*
+        Resource: arn:aws:s3:::${self:provider.environment.USER_IMAGE_S3_BUCKET}/*
 
   # add permissions
   GenerateUploadUrl:
@@ -176,47 +175,58 @@ functions:
     events:
       - http:
           method: post
-          path: todos/{todoId}/attachment
+          path: trades/{tradeId}/attachment
           cors: true
-          authorizer: Auth
+          # authorizer: Auth
     iamRoleStatements:
       - Effect: Allow
         Action:
           - s3:PutObject
-        Resource: arn:aws:s3:::${self:provider.environment.TODOS_IMAGES_S3_BUCKET}/*
+        Resource: arn:aws:s3:::${self:provider.environment.USER_IMAGE_S3_BUCKET}/*
       - Effect: Allow
         Action:
           - dynamodb:Query
           - dynamodb:UpdateItem
-        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}
+        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TRADES_TABLE}
 
 resources:
   Resources:
     # Add DynamoDB Table Definition
     # DynamoDB is schemaless, we need to define only the primary key and global secondary keys.
-    TodosDynamoDBTable:
+    tradesDynamoDBTable:
       Type: AWS::DynamoDB::Table
       Properties:
         # single id field of type string which is the partition key
         AttributeDefinitions:
           - AttributeName: userId
             AttributeType: S
-          - AttributeName: todoId
+          - AttributeName: tradeDate
+            AttributeType: S
+          - AttributeName: tradeId
             AttributeType: S
         # so, we set the simple primary key as hash key
         KeySchema:
           - AttributeName: userId
             KeyType: HASH
-          - AttributeName: todoId
+          - AttributeName: tradeId
             KeyType: RANGE
+        LocalSecondaryIndexes:
+          - IndexName: ${self:provider.environment.INDEX_NAME_TABLE}
+            KeySchema:
+              - AttributeName: userId
+                KeyType: HASH
+              - AttributeName: tradeDate
+                KeyType: RANGE
+            Projection:
+              ProjectionType: ALL
         BillingMode: PAY_PER_REQUEST
-        TableName: ${self:provider.environment.TODOS_TABLE}
+        TableName: ${self:provider.environment.TRADES_TABLE}
 
     # add S3 buckte to store images
     AttachmentsBucket:
       Type: AWS::S3::Bucket
       Properties:
-        BucketName: ${self:provider.environment.TODOS_IMAGES_S3_BUCKET}
+        BucketName: ${self:provider.environment.USER_IMAGE_S3_BUCKET}
         # important so S3 can send the correct CORS HEADERS
         CorsConfiguration:
           CorsRules:
@@ -244,7 +254,7 @@ resources:
               # allows for anybody '*' to get objects of our s3 bucket
               Principal: '*'
               Action: 's3:GetObject'
-              Resource: 'arn:aws:s3:::${self:provider.environment.TODOS_IMAGES_S3_BUCKET}/*'
+              Resource: 'arn:aws:s3:::${self:provider.environment.USER_IMAGE_S3_BUCKET}/*'
         # specify which bucket this bucketPolicy should be applied
         Bucket: !Ref AttachmentsBucket
 

@@ -3,7 +3,7 @@
  */
 export interface TodoItem {
 	userId: string
-	todoId: string
+	tradeId: string
 	createdAt: string
 	name: string
 	dueDate: string
