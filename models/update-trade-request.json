@@ -2,28 +2,39 @@
   "$schema": "http://json-schema.org/draft-04/schema#",
   "title": "update",
   "type": "object",
-  "properties": {
-    "name": {
-      "type": "string"
-    },
-    "tradeDate": {
-      "type": "string"
-    },
-    "description": {
-      "type": "string",
-      "minLength": 3,
-      "maxLength": 50
-    }
-  },
-  "required": [
-    "name",
-    "tradeDate"
-  ],
-  "additionalProperties": {
     "properties": {
-      "done": {
-        "type": "boolean"
+      "crypto": {
+        "type": "string"
+      },
+      "tradeDate": {
+        "type": "string"
+      },
+      "tradeType": {
+        "type": "string"
+      },
+      "tradeCostPercent": {
+        "type": "string"
+      },
+      "exchange": {
+        "type": "string",
+        "minLength": 3,
+        "maxLength": 20
+      },
+      "quantity": {
+        "type": "number"
+      },
+      "price": {
+        "type": "number"
       }
-    }
-  }
+    },
+    "required": [
+      "crypto",
+      "tradeDate",
+      "tradeType",
+      "tradeCostPercent",
+      "exchange",
+      "quantity",
+      "price"
+    ],
+    "additionalProperties": false
 }

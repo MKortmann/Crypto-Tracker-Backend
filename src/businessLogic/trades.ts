@@ -2,7 +2,7 @@
 
 import * as uuid from 'uuid'
 import { CreateTrade } from '../models/CreateTrade'
-import { TodoAccess } from '../dataLayer/tradesAccess'
+import { TradeAccess } from '../dataLayer/tradesAccess'
 import { CreateTradeRequest } from '../requests/CreateTradeRequest'
 import { UpdateTradeRequest } from '../requests/UpdateTradeRequest'
 import { parseUserId } from '../auth/utils'
@@ -11,7 +11,7 @@ import { createLogger } from '../utils/logger'
 const logger = createLogger('todos')
 
 // all code that works with DynamoDB is encapsulated in the dataLayer called TodoAccess
-const todoAccess = new TodoAccess()
+const todoAccess = new TradeAccess()
 
 export async function getTrades(jwtToken: string): Promise<CreateTrade[]> {
 	const userId = parseUserId(jwtToken)

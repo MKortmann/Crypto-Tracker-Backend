@@ -6,9 +6,9 @@ import { CreateTrade } from '../models/CreateTrade'
 import { UpdateTradeRequest } from '../requests/UpdateTradeRequest'
 
 const XAWS = AWSXRay.captureAWS(AWS)
-const logger = createLogger('todosAccess')
+const logger = createLogger('tradesAccess')
 
-export class TodoAccess {
+export class TradeAccess {
 	constructor(
 		private readonly docClient: DocumentClient = createDynamoDBClient(),
 		private readonly tradesTable = process.env.TRADES_TABLE,
@@ -119,6 +119,23 @@ export class TodoAccess {
 			return result
 		}
 
+		// await this.docClient
+		// 	.update({
+		// 		TableName: this.tradesTable,
+		// 		Key: {
+		// 			userId,
+		// 			tradeId,
+		// 		},
+		// 		UpdateExpression: 'set #crypto = if_not_exists(crypto, :crypto)',
+		// 		ExpressionAttributeValues: {
+		// 			':crypto': parsedBody.crypto,
+		// 		},
+		// 		ExpressionAttributeNames: {
+		// 			'#crypto': 'crypto',
+		// 		},
+		// 		ReturnValues: 'UPDATED_NEW',
+		// 	})
+		// 	.promise()
 		await this.docClient
 			.update({
 				TableName: this.tradesTable,
@@ -126,14 +143,25 @@ export class TodoAccess {
 					userId,
 					tradeId,
 				},
-				UpdateExpression: 'set #crypto =:crypto, #tradeDate=:tradeDate',
+				UpdateExpression:
+					'set #crypto =:crypto, #tradeDate=:tradeDate, #tradeType=:tradeType, #tradeCostPercent=:tradeCostPercent, #exchange=:exchange, #quantity=:quantity, #price=:price',
 				ExpressionAttributeValues: {
 					':crypto': parsedBody.crypto,
 					':tradeDate': parsedBody.tradeDate,
+					':tradeType': parsedBody.tradeDate,
+					':tradeCostPercent': parsedBody.tradeDate,
+					':exchange': parsedBody.tradeDate,
+					':quantity': parsedBody.tradeDate,
+					':price': parsedBody.tradeDate,
 				},
 				ExpressionAttributeNames: {
 					'#crypto': 'crypto',
 					'#tradeDate': 'tradeDate',
+					'#tradeType': 'tradeType',
+					'#tradeCostPercent': 'tradeCostPercent',
+					'#exchange': 'exchange',
+					'#quantity': 'quantity',
+					'#price': 'price',
 				},
 				ReturnValues: 'UPDATED_NEW',
 			})

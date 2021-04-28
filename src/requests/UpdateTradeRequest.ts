@@ -4,9 +4,9 @@
 export interface UpdateTradeRequest {
 	crypto: string
 	tradeDate: string
-	exchange: string
 	tradeType: string
 	tradeCostPercent: number
+	exchange: string
 	quantity: number
 	price: number
 }
