@@ -28,7 +28,6 @@
       }
     },
     "required": [
-      "crypto",
       "tradeDate",
       "tradeType",
       "tradeCostPercent",

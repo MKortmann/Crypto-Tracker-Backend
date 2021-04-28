@@ -98,7 +98,7 @@ export class TradeAccess {
 			body: '',
 		}
 
-		let todoToBeUpdate = await this.docClient
+		let cryptoItemToBeUpdate = await this.docClient
 			.query({
 				TableName: this.tradesTable,
 				KeyConditionExpression: 'userId = :userId AND tradeId = :tradeId',
@@ -109,9 +109,9 @@ export class TradeAccess {
 			})
 			.promise()
 
-		logger.info('Item to be updated', todoToBeUpdate)
+		logger.info('Item to be updated', cryptoItemToBeUpdate)
 
-		if (todoToBeUpdate.Items.length === 0) {
+		if (cryptoItemToBeUpdate.Items.length === 0) {
 			result = {
 				statusCode: 404,
 				body: 'The item to be update was not found',
@@ -136,6 +136,17 @@ export class TradeAccess {
 		// 		ReturnValues: 'UPDATED_NEW',
 		// 	})
 		// 	.promise()
+
+		// only as an example that if the body does not contains crypto, we can update it to avoid error below as optionall... I wil let here as an example
+		parsedBody.crypto = parsedBody.crypto
+			? parsedBody.crypto
+			: cryptoItemToBeUpdate.Items[0].crypto
+
+		console.log(
+			'cryptoItemToBeUpdate.Items[0].crypto',
+			cryptoItemToBeUpdate.Items[0].crypto
+		)
+
 		await this.docClient
 			.update({
 				TableName: this.tradesTable,
