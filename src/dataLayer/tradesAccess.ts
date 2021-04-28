@@ -40,7 +40,7 @@ export class TradeAccess {
 			body: '',
 		}
 
-		let todoToBeDeleted = await this.docClient
+		let tradeItem = await this.docClient
 			.query({
 				TableName: this.tradesTable,
 				KeyConditionExpression: 'userId = :userId AND tradeId = :tradeId',
@@ -51,7 +51,7 @@ export class TradeAccess {
 			})
 			.promise()
 
-		if (todoToBeDeleted.Items.length === 0) {
+		if (tradeItem.Items.length === 0) {
 			result.statusCode = 404
 			result.body = 'The item to be deleted was not found'
 			return result
@@ -67,12 +67,12 @@ export class TradeAccess {
 			})
 			.promise()
 
-		await this.s3
-			.deleteObject({
-				Bucket: this.s3Bucket,
-				Key: tradeId,
-			})
-			.promise()
+		// await this.s3
+		// 	.deleteObject({
+		// 		Bucket: this.s3Bucket,
+		// 		Key: tradeId,
+		// 	})
+		// 	.promise()
 
 		return result
 	}
@@ -98,7 +98,7 @@ export class TradeAccess {
 			body: '',
 		}
 
-		let cryptoItemToBeUpdate = await this.docClient
+		let tradeItem = await this.docClient
 			.query({
 				TableName: this.tradesTable,
 				KeyConditionExpression: 'userId = :userId AND tradeId = :tradeId',
@@ -109,9 +109,9 @@ export class TradeAccess {
 			})
 			.promise()
 
-		logger.info('Item to be updated', cryptoItemToBeUpdate)
+		logger.info('Item to be updated', tradeItem)
 
-		if (cryptoItemToBeUpdate.Items.length === 0) {
+		if (tradeItem.Items.length === 0) {
 			result = {
 				statusCode: 404,
 				body: 'The item to be update was not found',
@@ -140,11 +140,11 @@ export class TradeAccess {
 		// only as an example that if the body does not contains crypto, we can update it to avoid error below as optionall... I wil let here as an example
 		parsedBody.crypto = parsedBody.crypto
 			? parsedBody.crypto
-			: cryptoItemToBeUpdate.Items[0].crypto
+			: tradeItem.Items[0].crypto
 
 		console.log(
 			'cryptoItemToBeUpdate.Items[0].crypto',
-			cryptoItemToBeUpdate.Items[0].crypto
+			tradeItem.Items[0].crypto
 		)
 
 		await this.docClient
