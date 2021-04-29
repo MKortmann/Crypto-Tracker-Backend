@@ -111,6 +111,7 @@ export class TradeAccess {
 			.promise()
 
 		logger.info('Item to be updated', tradeItem)
+		logger.info('ParsedBody', parsedBody)
 
 		if (tradeItem.Items.length === 0) {
 			result = {
@@ -127,7 +128,8 @@ export class TradeAccess {
 		// 			userId,
 		// 			tradeId,
 		// 		},
-		// 		UpdateExpression: 'set #crypto = if_not_exists(crypto, :crypto)',
+		// 		UpdateExpression: 'set #crypto =:crypto',
+		// 		ConditionExpression: `attribute_exists(crypto)`,
 		// 		ExpressionAttributeValues: {
 		// 			':crypto': parsedBody.crypto,
 		// 		},
@@ -139,14 +141,14 @@ export class TradeAccess {
 		// 	.promise()
 
 		// only as an example that if the body does not contains crypto, we can update it to avoid error below as optionall... I wil let here as an example
-		parsedBody.crypto = parsedBody.crypto
-			? parsedBody.crypto
-			: tradeItem.Items[0].crypto
+		// parsedBody.crypto = parsedBody.crypto
+		// 	? parsedBody.crypto
+		// 	: tradeItem.Items[0].crypto
 
-		console.log(
-			'cryptoItemToBeUpdate.Items[0].crypto',
-			tradeItem.Items[0].crypto
-		)
+		// console.log(
+		// 	'cryptoItemToBeUpdate.Items[0].crypto',
+		// 	tradeItem.Items[0].crypto
+		// )
 
 		await this.docClient
 			.update({
@@ -156,24 +158,15 @@ export class TradeAccess {
 					tradeId,
 				},
 				UpdateExpression:
-					'set #crypto =:crypto, #tradeDate=:tradeDate, #tradeType=:tradeType, #tradeCostPercent=:tradeCostPercent, #exchange=:exchange, #quantity=:quantity, #price=:price',
+					'set crypto =:crypto, tradeDate=:tradeDate, tradeType=:tradeType, tradeCostPercent=:tradeCostPercent, exchange=:exchange, quantity=:quantity, price=:price',
 				ExpressionAttributeValues: {
 					':crypto': parsedBody.crypto,
 					':tradeDate': parsedBody.tradeDate,
-					':tradeType': parsedBody.tradeDate,
-					':tradeCostPercent': parsedBody.tradeDate,
-					':exchange': parsedBody.tradeDate,
-					':quantity': parsedBody.tradeDate,
-					':price': parsedBody.tradeDate,
-				},
-				ExpressionAttributeNames: {
-					'#crypto': 'crypto',
-					'#tradeDate': 'tradeDate',
-					'#tradeType': 'tradeType',
-					'#tradeCostPercent': 'tradeCostPercent',
-					'#exchange': 'exchange',
-					'#quantity': 'quantity',
-					'#price': 'price',
+					':tradeType': parsedBody.tradeType,
+					':tradeCostPercent': parsedBody.tradeCostPercent,
+					':exchange': parsedBody.exchange,
+					':quantity': parsedBody.quantity,
+					':price': parsedBody.price,
 				},
 				ReturnValues: 'UPDATED_NEW',
 			})
