@@ -7,6 +7,7 @@ import { UpdateTradeRequest } from '../requests/UpdateTradeRequest'
 
 const XAWS = AWSXRay.captureAWS(AWS)
 const logger = createLogger('tradesAccess')
+const portDynamoDB = process.env.DYNAMODB_OFFLINE_PORT
 
 export class TradeAccess {
 	constructor(
@@ -37,7 +38,7 @@ export class TradeAccess {
 	async deleteItem(userId: string, tradeId: string) {
 		let result = {
 			statusCode: 200,
-			body: '',
+			body: 'The item was deleted',
 		}
 
 		let tradeItem = await this.docClient
@@ -95,7 +96,7 @@ export class TradeAccess {
 	) {
 		let result = {
 			statusCode: 200,
-			body: '',
+			body: `The item was updated`,
 		}
 
 		let tradeItem = await this.docClient
@@ -237,7 +238,7 @@ function createDynamoDBClient(): AWS.DynamoDB.DocumentClient {
 		logger.info('Creating a local DynamoDB instance')
 		return new XAWS.DynamoDB.DocumentClient({
 			region: 'localhost',
-			endpoint: 'http://localhost:8000',
+			endpoint: `http://localhost:${portDynamoDB}`,
 		})
 	}
 

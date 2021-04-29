@@ -41,6 +41,8 @@ provider:
     INDEX_TRADE_TABLE: tradeDate
     INDEX_EXCHANGE_TABLE: exchange
     INDEX_CRYPTO_TABLE: crypto
+    DYNAMODB_OFFLINE_PORT: 8000
+    SERVERLESS_OFFLINE_PORT: 3000
 
   iamRoleStatements:
     # for canary deployment to allow to use codedeploy
@@ -49,16 +51,22 @@ provider:
         - codedeploy:*
       Resource:
         - '*'
+    - Effect: 'Allow' # xray permissions (required)
+      Action:
+        - 'xray:PutTraceSegments'
+        - 'xray:PutTelemetryRecords'
+      Resource:
+        - '*'
 
 # to define models to our api we need to define models for our object in custom
 custom:
   serverless-offline:
-    port: 3000
+    port: ${self:provider.environment.SERVERLESS_OFFLINE_PORT}
   dynamodb:
     stages:
       - ${self:provider.stage}
     start:
-      port: 8000
+      port: ${self:provider.environment.DYNAMODB_OFFLINE_PORT}
       # all the data will be store in memory
       inMemory: true
       # it should create tables as definitions provided
