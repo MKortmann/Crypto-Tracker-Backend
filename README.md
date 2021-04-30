@@ -47,6 +47,8 @@ https://{{apiId}}.execute-api.eu-central-1.amazonaws.com/dev/trades/bfd12537-7d0
 - Data is store using DynamoDB with composite and LSK
 - Offline debug
 - Optimized function with specific .zip package
+- Canary Deployment
+- Optimization (reduzed lambda)
 
 ## Technologies
 
