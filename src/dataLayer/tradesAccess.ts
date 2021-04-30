@@ -10,6 +10,7 @@ const logger = createLogger('tradesAccess')
 const portDynamoDB = process.env.DYNAMODB_OFFLINE_PORT
 const indexNameExchangeTable = process.env.INDEX_EXCHANGE_TABLE
 const indexNameCryptoTable = process.env.INDEX_CRYPTO_TABLE
+const indexNameDateTable = process.env.INDEX_DATE_TABLE
 
 export class TradeAccess {
 	constructor(
@@ -71,6 +72,28 @@ export class TradeAccess {
 				ExpressionAttributeValues: {
 					':userId': userId,
 					':crypto': crypto,
+				},
+			})
+			.promise()
+
+		logger.info('Result', result)
+
+		const items = result.Items
+		return items as CreateTrade[]
+	}
+
+	async getTradesInDateScope(userId, start): Promise<CreateTrade[]> {
+		console.log(userId)
+		console.log(start)
+
+		const result = await this.docClient
+			.query({
+				TableName: this.tradesTable,
+				IndexName: indexNameDateTable,
+				KeyConditionExpression: 'userId = :userId AND tradeDate >= :start',
+				ExpressionAttributeValues: {
+					':userId': userId,
+					':start': start,
 				},
 			})
 			.promise()

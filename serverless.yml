@@ -38,7 +38,7 @@ provider:
     USER_IMAGE_S3_BUCKET: ${self:service.name}-images-${self:provider.stage}
     # add a presigned url for the upload url s3 bucket - 10 minutes expiration time
     USER_SIGNED_URL_EXPIRATION: 700
-    INDEX_TRADE_TABLE: tradeDate
+    INDEX_DATE_TABLE: tradeDate
     INDEX_EXCHANGE_TABLE: exchange
     INDEX_CRYPTO_TABLE: crypto
     DYNAMODB_OFFLINE_PORT: 8000
@@ -121,7 +121,6 @@ functions:
           # so we specified here that it should use the auth func. specified before
           # authorizer: Auth
     iamRoleStatements:
-      # TRADES_TABLE permissions for all lambda functions
       - Effect: Allow
         Action:
           - dynamodb:Query
@@ -134,16 +133,28 @@ functions:
       - http:
           method: get
           path: trades/crypto/{crypto}
-          # fix problem with preflight request
           cors: true
-          # so we specified here that it should use the auth func. specified before
-          # authorizer: Auth
+          authorizer: Auth
     iamRoleStatements:
-      # TRADES_TABLE permissions for all lambda functions
       - Effect: Allow
         Action:
           - dynamodb:Query
         Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TRADES_TABLE}/index/${self:provider.environment.INDEX_CRYPTO_TABLE}
+
+  # GetTrades at from a start date
+  GetTradesInDateScope:
+    handler: src/lambda/http/getTradesInDateScope.handler
+    events:
+      - http:
+          method: get
+          path: trades/date/start/{start}
+          cors: true
+          authorizer: Auth
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamodb:Query
+        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TRADES_TABLE}/index/${self:provider.environment.INDEX_DATE_TABLE}
 
   createTrade:
     handler: src/lambda/http/createTrade.handler
@@ -261,7 +272,7 @@ resources:
           - AttributeName: tradeId
             KeyType: RANGE
         LocalSecondaryIndexes:
-          - IndexName: ${self:provider.environment.INDEX_TRADE_TABLE}
+          - IndexName: ${self:provider.environment.INDEX_DATE_TABLE}
             KeySchema:
               - AttributeName: userId
                 KeyType: HASH
