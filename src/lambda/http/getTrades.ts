@@ -11,23 +11,25 @@ const logger = createLogger('getTrades')
 export const handler = middy(
 	async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
 		logger.info('Processing getTrades Event: ', {
-			event
+			event,
 		})
 
 		const jwtToken = getToken(event)
 		const items = await getTrades(jwtToken)
 
+		logger.info('returning the result items', items)
+
 		return {
 			statusCode: 200,
 			body: JSON.stringify({
-				items
-			})
+				items,
+			}),
 		}
 	}
 )
 
 handler.use(
 	cors({
-		credentials: true
+		credentials: true,
 	})
 )

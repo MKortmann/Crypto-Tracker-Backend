@@ -101,7 +101,7 @@ functions:
           # fix problem with preflight request
           cors: true
           # so we specified here that it should use the auth func. specified before
-          # authorizer: Auth
+          authorizer: Auth
     iamRoleStatements:
       # TRADES_TABLE permissions for all lambda functions
       - Effect: Allow

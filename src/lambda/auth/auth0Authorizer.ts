@@ -5,9 +5,9 @@
 // WE WILL USE A CUSTOM AUTHORIZER: it is basically a Lambda function that is executed before a processing a request
 
 import {
-	CustomAuthorizerEvent,
-	CustomAuthorizerHandler,
-	CustomAuthorizerResult
+	APIGatewayTokenAuthorizerEvent,
+	APIGatewayAuthorizerResult,
+	APIGatewayAuthorizerHandler,
 } from 'aws-lambda'
 import 'source-map-support/register'
 import Axios from 'axios'
@@ -21,9 +21,9 @@ const logger = createLogger('auth')
 
 const jwksUrl = 'https://dev-oeeh6hdb.eu.auth0.com/.well-known/jwks.json'
 
-export const handler: CustomAuthorizerHandler = async (
-	event: CustomAuthorizerEvent
-): Promise<CustomAuthorizerResult> => {
+export const handler: APIGatewayAuthorizerHandler = async (
+	event: APIGatewayTokenAuthorizerEvent
+): Promise<APIGatewayAuthorizerResult> => {
 	try {
 		// we first call the verifyToken function and pass the token that we need to verify.
 		const jwtToken = await verifyToken(event.authorizationToken)
@@ -40,10 +40,10 @@ export const handler: CustomAuthorizerHandler = async (
 					{
 						Action: 'execute-api:Invoke',
 						Effect: 'Allow',
-						Resource: '*'
-					}
-				]
-			}
+						Resource: '*',
+					},
+				],
+			},
 		}
 	} catch (e) {
 		logger.error('User was not authorized', { error: e.message })
@@ -58,10 +58,10 @@ export const handler: CustomAuthorizerHandler = async (
 					{
 						Action: 'execute-api:Invoke',
 						Effect: 'Deny',
-						Resource: '*'
-					}
-				]
-			}
+						Resource: '*',
+					},
+				],
+			},
 		}
 	}
 }
