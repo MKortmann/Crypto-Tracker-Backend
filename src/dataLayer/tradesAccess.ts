@@ -82,18 +82,21 @@ export class TradeAccess {
 		return items as CreateTrade[]
 	}
 
-	async getTradesInDateScope(userId, start): Promise<CreateTrade[]> {
+	async getTradesInDateScope(userId, start, end): Promise<CreateTrade[]> {
 		console.log(userId)
 		console.log(start)
+		console.log(end)
 
 		const result = await this.docClient
 			.query({
 				TableName: this.tradesTable,
 				IndexName: indexNameDateTable,
-				KeyConditionExpression: 'userId = :userId AND tradeDate >= :start',
+				KeyConditionExpression:
+					'userId = :userId AND  tradeDate BETWEEN :start AND :end',
 				ExpressionAttributeValues: {
 					':userId': userId,
 					':start': start,
+					':end': end,
 				},
 			})
 			.promise()

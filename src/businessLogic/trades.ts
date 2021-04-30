@@ -39,11 +39,12 @@ export async function getTradesWithCrypto(
 
 export async function getTradesInDateScope(
 	jwtToken: string,
-	start: string
+	start: string,
+	end: string
 ): Promise<CreateTrade[]> {
 	const userId = parseUserId(jwtToken)
 
-	return todoAccess.getTradesInDateScope(userId, start)
+	return todoAccess.getTradesInDateScope(userId, start, end)
 }
 
 export async function deleteTrade(jwtToken: string, tradeId: string) {

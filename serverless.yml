@@ -147,7 +147,7 @@ functions:
     events:
       - http:
           method: get
-          path: trades/date/start/{start}
+          path: trades/date/start/{start}/end/{end}
           cors: true
           authorizer: Auth
     iamRoleStatements:

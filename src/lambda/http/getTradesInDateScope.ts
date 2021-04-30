@@ -15,8 +15,9 @@ export const handler = middy(
 		})
 
 		const start: string = event.pathParameters.start
+		const end: string = event.pathParameters.end
 		const jwtToken = getToken(event)
-		const items = await getTradesInDateScope(jwtToken, start)
+		const items = await getTradesInDateScope(jwtToken, start, end)
 
 		logger.info('returning the result items', items)
 
