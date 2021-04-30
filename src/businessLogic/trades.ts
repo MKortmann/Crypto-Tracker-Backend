@@ -19,6 +19,34 @@ export async function getTrades(jwtToken: string): Promise<CreateTrade[]> {
 	return todoAccess.getTrades(userId)
 }
 
+export async function getTradesAtExchange(
+	jwtToken: string,
+	exchange: string
+): Promise<CreateTrade[]> {
+	const userId = parseUserId(jwtToken)
+
+	return todoAccess.getTradesAtExchange(userId, exchange)
+}
+
+export async function getTradesWithCrypto(
+	jwtToken: string,
+	crypto: string
+): Promise<CreateTrade[]> {
+	const userId = parseUserId(jwtToken)
+
+	return todoAccess.getTradesWithCrypto(userId, crypto)
+}
+
+export async function getTradesInDateScope(
+	jwtToken: string,
+	start: string,
+	end: string
+): Promise<CreateTrade[]> {
+	const userId = parseUserId(jwtToken)
+
+	return todoAccess.getTradesInDateScope(userId, start, end)
+}
+
 export async function deleteTrade(jwtToken: string, tradeId: string) {
 	const userId = parseUserId(jwtToken)
 	const toReturn = todoAccess.deleteItem(userId, tradeId)

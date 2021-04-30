@@ -8,6 +8,9 @@ import { UpdateTradeRequest } from '../requests/UpdateTradeRequest'
 const XAWS = AWSXRay.captureAWS(AWS)
 const logger = createLogger('tradesAccess')
 const portDynamoDB = process.env.DYNAMODB_OFFLINE_PORT
+const indexNameExchangeTable = process.env.INDEX_EXCHANGE_TABLE
+const indexNameCryptoTable = process.env.INDEX_CRYPTO_TABLE
+const indexNameDateTable = process.env.INDEX_DATE_TABLE
 
 export class TradeAccess {
 	constructor(
@@ -25,6 +28,75 @@ export class TradeAccess {
 				KeyConditionExpression: 'userId = :userId',
 				ExpressionAttributeValues: {
 					':userId': userId,
+				},
+			})
+			.promise()
+
+		logger.info('Result', result)
+
+		const items = result.Items
+		return items as CreateTrade[]
+	}
+
+	async getTradesAtExchange(userId, exchange): Promise<CreateTrade[]> {
+		console.log(userId)
+		console.log(exchange)
+
+		const result = await this.docClient
+			.query({
+				TableName: this.tradesTable,
+				IndexName: indexNameExchangeTable,
+				KeyConditionExpression: 'userId = :userId AND exchange = :exchange',
+				ExpressionAttributeValues: {
+					':userId': userId,
+					':exchange': exchange,
+				},
+			})
+			.promise()
+
+		logger.info('Result', result)
+
+		const items = result.Items
+		return items as CreateTrade[]
+	}
+
+	async getTradesWithCrypto(userId, crypto): Promise<CreateTrade[]> {
+		console.log(userId)
+		console.log(crypto)
+
+		const result = await this.docClient
+			.query({
+				TableName: this.tradesTable,
+				IndexName: indexNameCryptoTable,
+				KeyConditionExpression: 'userId = :userId AND crypto = :crypto',
+				ExpressionAttributeValues: {
+					':userId': userId,
+					':crypto': crypto,
+				},
+			})
+			.promise()
+
+		logger.info('Result', result)
+
+		const items = result.Items
+		return items as CreateTrade[]
+	}
+
+	async getTradesInDateScope(userId, start, end): Promise<CreateTrade[]> {
+		console.log(userId)
+		console.log(start)
+		console.log(end)
+
+		const result = await this.docClient
+			.query({
+				TableName: this.tradesTable,
+				IndexName: indexNameDateTable,
+				KeyConditionExpression:
+					'userId = :userId AND  tradeDate BETWEEN :start AND :end',
+				ExpressionAttributeValues: {
+					':userId': userId,
+					':start': start,
+					':end': end,
 				},
 			})
 			.promise()
