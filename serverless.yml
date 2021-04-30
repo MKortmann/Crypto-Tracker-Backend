@@ -109,7 +109,7 @@ functions:
           - dynamodb:Query
         Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TRADES_TABLE}
 
-  # GetTrades relative with the exchange
+  # GetTrades regards to a specific exchange
   GetTradesAtExchange:
     handler: src/lambda/http/getTradesAtExchange.handler
     events:
@@ -126,6 +126,24 @@ functions:
         Action:
           - dynamodb:Query
         Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TRADES_TABLE}/index/${self:provider.environment.INDEX_EXCHANGE_TABLE}
+
+  # GetTrades relative with a specific crypto
+  GetTradesWithCrypto:
+    handler: src/lambda/http/getTradesWithCrypto.handler
+    events:
+      - http:
+          method: get
+          path: trades/crypto/{crypto}
+          # fix problem with preflight request
+          cors: true
+          # so we specified here that it should use the auth func. specified before
+          # authorizer: Auth
+    iamRoleStatements:
+      # TRADES_TABLE permissions for all lambda functions
+      - Effect: Allow
+        Action:
+          - dynamodb:Query
+        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TRADES_TABLE}/index/${self:provider.environment.INDEX_CRYPTO_TABLE}
 
   createTrade:
     handler: src/lambda/http/createTrade.handler
