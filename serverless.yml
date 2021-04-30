@@ -14,6 +14,14 @@ plugins:
   # Add Canary Deployment to be able to deploy our neu func. step by step
   - serverless-plugin-canary-deployments
 
+# optimizing our functions
+# we need to provide in the cmd more memory as
+# export NODE_OPTIONS=--max_old_space_size=45000
+
+# commenting here because it is taking a lot of time to compile
+package:
+  individually: true
+
 provider:
   name: aws
   runtime: nodejs12.x
