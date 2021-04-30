@@ -117,7 +117,7 @@ functions:
           path: trades
           cors: true
           # so we specified here that it should use the auth func. specified before
-          # authorizer: Auth
+          authorizer: Auth
           reqValidatorName: RequestBodyValidator
           documentation:
             summary: Create a new trade item
@@ -139,7 +139,7 @@ functions:
           method: patch
           path: trades/{tradeId}
           cors: true
-          # authorizer: Auth
+          authorizer: Auth
           reqValidatorName: RequestBodyValidator
           documentation:
             summary: Update a trade item
@@ -165,7 +165,7 @@ functions:
           method: delete
           path: trades/{tradeId}
           cors: true
-          # authorizer: Auth
+          authorizer: Auth
     iamRoleStatements:
       # TRADES_TABLE permissions for all lambda functions
       - Effect: Allow
@@ -187,7 +187,7 @@ functions:
           method: post
           path: trades/{tradeId}/attachment
           cors: true
-          # authorizer: Auth
+          authorizer: Auth
     iamRoleStatements:
       - Effect: Allow
         Action:
