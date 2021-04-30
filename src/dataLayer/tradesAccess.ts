@@ -8,6 +8,7 @@ import { UpdateTradeRequest } from '../requests/UpdateTradeRequest'
 const XAWS = AWSXRay.captureAWS(AWS)
 const logger = createLogger('tradesAccess')
 const portDynamoDB = process.env.DYNAMODB_OFFLINE_PORT
+const indexNameExchangeTable = process.env.INDEX_EXCHANGE_TABLE
 
 export class TradeAccess {
 	constructor(
@@ -25,6 +26,28 @@ export class TradeAccess {
 				KeyConditionExpression: 'userId = :userId',
 				ExpressionAttributeValues: {
 					':userId': userId,
+				},
+			})
+			.promise()
+
+		logger.info('Result', result)
+
+		const items = result.Items
+		return items as CreateTrade[]
+	}
+
+	async getTradesAtExchange(userId, exchange): Promise<CreateTrade[]> {
+		console.log(userId)
+		console.log(exchange)
+
+		const result = await this.docClient
+			.query({
+				TableName: this.tradesTable,
+				IndexName: indexNameExchangeTable,
+				KeyConditionExpression: 'userId = :userId AND exchange = :exchange',
+				ExpressionAttributeValues: {
+					':userId': userId,
+					':exchange': exchange,
 				},
 			})
 			.promise()

@@ -91,7 +91,7 @@ functions:
   Auth:
     handler: src/lambda/auth/auth0Authorizer.handler
 
-  # trade: Configure this function
+  # Get all trades
   GetTrades:
     handler: src/lambda/http/getTrades.handler
     events:
@@ -108,6 +108,24 @@ functions:
         Action:
           - dynamodb:Query
         Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TRADES_TABLE}
+
+  # GetTrades relative with the exchange
+  GetTradesAtExchange:
+    handler: src/lambda/http/getTradesAtExchange.handler
+    events:
+      - http:
+          method: get
+          path: trades/exchange/{exchange}
+          # fix problem with preflight request
+          cors: true
+          # so we specified here that it should use the auth func. specified before
+          # authorizer: Auth
+    iamRoleStatements:
+      # TRADES_TABLE permissions for all lambda functions
+      - Effect: Allow
+        Action:
+          - dynamodb:Query
+        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TRADES_TABLE}/index/${self:provider.environment.INDEX_EXCHANGE_TABLE}
 
   createTrade:
     handler: src/lambda/http/createTrade.handler
